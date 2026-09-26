@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"strings"
 )
 
 // Process is one entry in a process table: a pid, its parent pid, and
@@ -69,6 +70,24 @@ func Find(nodes []*Node, pid int) *Node {
 		}
 	}
 	return nil
+}
+
+// FilterByName returns a new forest containing only nodes whose Name
+// contains substr, plus any ancestor needed to keep a matching node
+// reachable from a root. The input tree is not modified. A node with no
+// matching descendants and a non-matching name is dropped, so filtering
+// for e.g. "sh" still shows the chain of parents leading to a matching
+// bash or ssh process, not just that process in isolation.
+func FilterByName(nodes []*Node, substr string) []*Node {
+	var out []*Node
+	for _, n := range nodes {
+		children := FilterByName(n.Children, substr)
+		if len(children) == 0 && !strings.Contains(n.Name, substr) {
+			continue
+		}
+		out = append(out, &Node{Process: n.Process, Children: children})
+	}
+	return out
 }
 
 // Fprint writes the tree in a pstree-like format, e.g.:

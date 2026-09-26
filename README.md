@@ -39,6 +39,12 @@ still works fine, you just have to supply the process list yourself.
 `proctree.Find(roots, pid)` walks the tree and returns the node for a
 given pid, or nil.
 
+`proctree.FilterByName(roots, substr)` returns a pruned forest keeping
+only processes whose name contains `substr`, along with the ancestors
+needed to reach them from a root — so filtering for `sh` still shows
+the parent chain down to a matching `bash`, not just that one process
+floating with no context.
+
 ## CLI
 
 ```
@@ -52,8 +58,18 @@ subtree:
 go run ./cmd/proctree -pid 1011
 ```
 
+or to only show processes whose name contains a substring (plus their
+ancestors):
+
+```
+go run ./cmd/proctree -name sh
+```
+
+`-pid` and `-name` can be combined: `-pid` picks the subtree first,
+then `-name` filters within it.
+
 ## Status
 
-First pass. Linux only for live process reading, no filtering by name,
-no JSON output yet. See the library section above if you want the tree
-logic without any of that.
+First pass. Linux only for live process reading, no JSON output yet.
+See the library section above if you want the tree logic without any
+of that.

@@ -12,6 +12,7 @@ import (
 
 func main() {
 	pid := flag.Int("pid", 0, "only show the subtree rooted at this pid")
+	name := flag.String("name", "", "only show processes whose name contains this substring, plus their ancestors")
 	flag.Parse()
 
 	procs, err := proctree.ReadProcesses()
@@ -29,6 +30,10 @@ func main() {
 			os.Exit(1)
 		}
 		roots = []*proctree.Node{n}
+	}
+
+	if *name != "" {
+		roots = proctree.FilterByName(roots, *name)
 	}
 
 	proctree.Fprint(os.Stdout, roots)
